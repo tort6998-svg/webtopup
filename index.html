@@ -1,33 +1,71 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Web Topup</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body{font-family:sans-serif;background:#f2f2f2;text-align:center;padding:20px}
-.box{background:white;padding:20px;border-radius:10px;max-width:400px;margin:auto}
-input{width:100%;padding:10px;margin:5px 0}
-button{width:100%;padding:10px;background:green;color:white;border:none;border-radius:5px}
-a{display:block;margin-top:10px}
-</style>
-</head>
-<body>
+let settings = {
+  playerWinRate: 0.45,
+  bankerWinRate: 0.45,
+  tieRate: 0.10,
+  payoutPlayer: 1,
+  payoutBanker: 0.95,
+  payoutTie: 8
+};
 
-<div class="box">
-<h2>ສະມັກສະມາຊິກ</h2>
-<input type="text" placeholder="ຊື່ຜູ້ໃຊ້">
-<input type="password" placeholder="ລະຫັດຜ່ານ">
-<button onclick="alert('ສະມັກສຳເລັດ')">ສະມັກ</button>
+function playGame(betChoice, betAmount, userBalance) {
+  let random = Math.random();
+  let result;
 
-<hr>
+  if (random < settings.playerWinRate) {
+    result = "PLAYER";
+  } else if (random < settings.playerWinRate + settings.bankerWinRate) {
+    result = "BANKER";
+  } else {
+    result = "TIE";
+  }
 
-<h3>ເຕີມເງິນ</h3>
-<p>ໂອນເງິນໄປບັນຊີ:</p>
-<b>ເລກບັນຊີ0101241255050</b>
+  let winAmount = 0;
 
-<a href="https://wa.me/8562094024529">WhatsApp Admin</a>
-</div>
+  if (betChoice === result) {
+    if (result === "PLAYER") winAmount = betAmount * settings.payoutPlayer;
+    if (result === "BANKER") winAmount = betAmount * settings.payoutBanker;
+    if (result === "TIE") winAmount = betAmount * settings.payoutTie;
+  } else {
+    winAmount = -betAmount;
+  }
 
-</body>
-</html>
+  return userBalance + winAmount;
+}
+<h2>Demo Baccarat</h2>
+<p>เครดิต: <span id="balance">10000</span></p>
+
+<input type="number" id="betAmount" placeholder="จำนวนเดิมพัน">
+<button onclick="bet('PLAYER')">PLAYER</button>
+<button onclick="bet('BANKER')">BANKER</button>
+<button onclick="bet('TIE')">TIE</button>
+
+<script>
+let balance = 10000;
+
+function bet(choice){
+  let betAmount = parseInt(document.getElementById("betAmount").value);
+  fetch("/play", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({choice, betAmount})
+  })
+  .then(res => res.json())
+  .then(data => {
+    balance = data.newBalance;
+    document.getElementById("balance").innerText = balance;
+    alert("ผล: " + data.result);
+  });
+}
+</script>function deposit(amount, userBalance){
+  return userBalance + amount;
+}
+
+function withdraw(amount, userBalance){
+  if(userBalance >= amount){
+    return userBalance - amount;
+  }
+  return userBalance;
+}app.post("/admin/update-settings", (req, res) => {
+  settings = req.body;
+  res.json({status: "updated"});
+});
