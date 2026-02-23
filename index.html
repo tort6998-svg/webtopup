@@ -1,71 +1,92 @@
-let settings = {
-  playerWinRate: 0.45,
-  bankerWinRate: 0.45,
-  tieRate: 0.10,
-  payoutPlayer: 1,
-  payoutBanker: 0.95,
-  payoutTie: 8
-};
-
-function playGame(betChoice, betAmount, userBalance) {
-  let random = Math.random();
-  let result;
-
-  if (random < settings.playerWinRate) {
-    result = "PLAYER";
-  } else if (random < settings.playerWinRate + settings.bankerWinRate) {
-    result = "BANKER";
-  } else {
-    result = "TIE";
-  }
-
-  let winAmount = 0;
-
-  if (betChoice === result) {
-    if (result === "PLAYER") winAmount = betAmount * settings.payoutPlayer;
-    if (result === "BANKER") winAmount = betAmount * settings.payoutBanker;
-    if (result === "TIE") winAmount = betAmount * settings.payoutTie;
-  } else {
-    winAmount = -betAmount;
-  }
-
-  return userBalance + winAmount;
-}
-<h2>Demo Baccarat</h2>
-<p>เครดิต: <span id="balance">10000</span></p>
-
-<input type="number" id="betAmount" placeholder="จำนวนเดิมพัน">
-<button onclick="bet('PLAYER')">PLAYER</button>
-<button onclick="bet('BANKER')">BANKER</button>
-<button onclick="bet('TIE')">TIE</button>
-
-<script>
-let balance = 10000;
-
-function bet(choice){
-  let betAmount = parseInt(document.getElementById("betAmount").value);
-  fetch("/play", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({choice, betAmount})
-  })
-  .then(res => res.json())
-  .then(data => {
-    balance = data.newBalance;
-    document.getElementById("balance").innerText = balance;
-    alert("ผล: " + data.result);
-  });
-}
-</script>function deposit(amount, userBalance){
-  return userBalance + amount;
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ເວັບເຕີມເກມ</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(to right,#1f1c2c,#928dab);
+  color:white;
+  text-align:center;
 }
 
-function withdraw(amount, userBalance){
-  if(userBalance >= amount){
-    return userBalance - amount;
-  }
-  return userBalance;
-}app.post("/admin/update-settings", (req, res) => {
-  settings = req.body;
-  res.json({status: "updated"});
-});
+h1{
+  padding:20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(2,1fr);
+  gap:15px;
+  padding:20px;
+}
+
+.card{
+  background:#2c2c3c;
+  padding:15px;
+  border-radius:15px;
+}
+
+.card img{
+  width:100%;
+  border-radius:10px;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  border:none;
+  border-radius:8px;
+  background:#ff4b2b;
+  color:white;
+}
+
+.more{
+  margin:20px;
+  padding:15px;
+  background:linear-gradient(to right,#ff416c,#ff4b2b);
+  border-radius:25px;
+}
+</style>
+</head>
+<body>
+
+<h1>🎮 ເລືອກເກມ</h1>
+
+<div class="grid">
+
+<div class="card">
+<img src="freefire.png">
+<p>Free Fire</p>
+<button>ເຕີມເກມ</button>
+</div>
+
+<div class="card">
+<img src="mlbb.png">
+<p>Mobile Legends</p>
+<button>ເຕີມເກມ</button>
+</div>
+
+<div class="card">
+<img src="rov.png">
+<p>RoV</p>
+<button>ເຕີມເກມ</button>
+</div>
+
+<div class="card">
+<img src="roblox.png">
+<p>Roblox</p>
+<button>ເຕີມເກມ</button>
+</div>
+
+</div>
+
+<div class="more">
+ເກມອື່ນໆ (More Games)
+</div>
+
+</body>
+</html>
