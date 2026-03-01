@@ -1,92 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>ເວັບເຕີມເກມ</title>
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(to right,#1f1c2c,#928dab);
-  color:white;
-  text-align:center;
+<title>ຮ້ານຂອງຂ້ອຍ</title>
+
+<script>
+let products = [
+  {name:"ສິນຄ້າ A", price:50000, qty:0},
+  {name:"ສິນຄ້າ B", price:30000, qty:0},
+  {name:"ສິນຄ້າ C", price:20000, qty:0}
+];
+
+function changeQty(index, change){
+  products[index].qty += change;
+  if(products[index].qty < 0) products[index].qty = 0;
+  document.getElementById("qty"+index).innerText = products[index].qty;
+  updateTotal();
 }
 
-h1{
-  padding:20px;
-}
+function updateTotal(){
+  let total = 0;
+  let summary = "";
+  
+  products.forEach(p=>{
+    if(p.qty > 0){
+      total += p.price * p.qty;
+      summary += p.name + " x" + p.qty + ", ";
+    }
+  });
 
-.grid{
-  display:grid;
-  grid-template-columns: repeat(2,1fr);
-  gap:15px;
-  padding:20px;
+  document.getElementById("total").innerText = total;
+  document.getElementById("amount").value = total;
+  document.getElementById("summary").value = summary;
 }
+</script>
 
-.card{
-  background:#2c2c3c;
-  padding:15px;
-  border-radius:15px;
-}
-
-.card img{
-  width:100%;
-  border-radius:10px;
-}
-
-button{
-  margin-top:10px;
-  padding:10px;
-  width:100%;
-  border:none;
-  border-radius:8px;
-  background:#ff4b2b;
-  color:white;
-}
-
-.more{
-  margin:20px;
-  padding:15px;
-  background:linear-gradient(to right,#ff416c,#ff4b2b);
-  border-radius:25px;
-}
-</style>
 </head>
-<body>
+<body onload="updateTotal()">
 
-<h1>🎮 ເລືອກເກມ</h1>
+<h2>🛒 ເລືອກສິນຄ້າ</h2>
 
-<div class="grid">
-
-<div class="card">
-<img src="freefire.png">
-<p>Free Fire</p>
-<button>ເຕີມເກມ</button>
+<div>
+<h3>ສິນຄ້າ A (50,000 ກີບ)</h3>
+<button onclick="changeQty(0,-1)">➖</button>
+<span id="qty0">0</span>
+<button onclick="changeQty(0,1)">➕</button>
 </div>
 
-<div class="card">
-<img src="mlbb.png">
-<p>Mobile Legends</p>
-<button>ເຕີມເກມ</button>
+<div>
+<h3>ສິນຄ້າ B (30,000 ກີບ)</h3>
+<button onclick="changeQty(1,-1)">➖</button>
+<span id="qty1">0</span>
+<button onclick="changeQty(1,1)">➕</button>
 </div>
 
-<div class="card">
-<img src="rov.png">
-<p>RoV</p>
-<button>ເຕີມເກມ</button>
+<div>
+<h3>ສິນຄ້າ C (20,000 ກີບ)</h3>
+<button onclick="changeQty(2,-1)">➖</button>
+<span id="qty2">0</span>
+<button onclick="changeQty(2,1)">➕</button>
 </div>
 
-<div class="card">
-<img src="roblox.png">
-<p>Roblox</p>
-<button>ເຕີມເກມ</button>
-</div>
+<h2>💰 ລາຄາລວມ: <span id="total">0</span> ກີບ</h2>
 
-</div>
+<hr>
 
-<div class="more">
-ເກມອື່ນໆ (More Games)
-</div>
+<img src="PUT_QR_IMAGE_LINK" width="200"><br><br>
+
+<form action="PUT_YOUR_WEBAPP_URL" method="POST">
+<input type="text" name="name" placeholder="ຊື່" required><br><br>
+<input type="text" name="phone" placeholder="ເບີໂທ" required><br><br>
+<input type="text" name="slip" placeholder="ລິ້ງຮູບສະລິບ" required><br><br>
+
+<input type="hidden" name="amount" id="amount">
+<input type="hidden" name="summary" id="summary">
+
+<button type="submit">ສົ່ງອໍເດີ</button>
+</form>
 
 </body>
-</html>
+  </html>
