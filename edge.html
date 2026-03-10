@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edgebreaker AI - ລະບົບວິເຄາະບາຄາຣ້າ</title>
+    <style>
+        body { background-color: #0d0d0d; color: #ffffff; font-family: 'Lao MN', 'Phetsarath OT', sans-serif; text-align: center; margin: 0; padding: 0; }
+        .container { max-width: 500px; margin: 30px auto; padding: 25px; border: 2px solid #ff0000; border-radius: 20px; background: linear-gradient(145deg, #1a1a1a, #000000); box-shadow: 0 0 30px rgba(255, 0, 0, 0.4); }
+        
+        h2 { color: #ff4500; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; text-shadow: 2px 2px #000; }
+        .sub-title { font-size: 0.8em; color: #888; margin-bottom: 20px; }
+
+        .display-screen { background: #000; padding: 25px; border-radius: 15px; margin-bottom: 20px; border: 1px dashed #ff4500; position: relative; }
+        .win-rate { font-size: 3.5em; color: #00ff00; font-weight: bold; text-shadow: 0 0 15px #00ff00; }
+        .label { font-size: 0.9em; color: #ccc; text-transform: uppercase; }
+
+        .suggestion-box { font-size: 1.8em; padding: 15px; border-radius: 10px; background: #222; margin: 15px 0; border-left: 5px solid #ff4500; font-weight: bold; }
+        
+        .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
+        .btn { padding: 20px; font-size: 1.3em; border: none; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
+        .btn-p { background: #0056b3; color: white; box-shadow: 0 4px #003d80; } /* Player */
+        .btn-b { background: #b30000; color: white; box-shadow: 0 4px #800000; } /* Banker */
+        .btn-t { background: #1b5e20; color: white; grid-column: span 2; padding: 10px; font-size: 1em; margin-top: 5px; } /* Tie */
+        
+        .btn:active { transform: translateY(4px); box-shadow: 0 0 #000; }
+
+        .history { margin-top: 25px; background: #111; padding: 10px; border-radius: 5px; color: #00ff00; font-family: monospace; }
+        .reset-btn { margin-top: 20px; background: none; border: 1px solid #444; color: #666; cursor: pointer; padding: 5px 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>EDGEBREAKER AI</h2>
+    <div class="sub-title">ລະບົບວິເຄາະຮູບແບບໄພ້ Precision v1.0</div>
+    
+    <div class="display-screen">
+        <div class="label">ອັດຕາການຊະນະ (Win Rate)</div>
+        <div class="win-rate" id="winRate">0%</div>
+        <div id="aiStatus" style="font-size: 0.8em; color: #ff4500;">ກຳລັງລໍຖ້າຂໍ້ມູນ...</div>
+    </div>
+
+    <div class="suggestion-box" id="suggestion">ປ້ອນຂໍ້ມູນ 3 ຕາ</div>
+
+    <div class="buttons">
+        <button class="btn btn-p" onclick="addRecord('P')">PLAYER</button>
+        <button class="btn btn-b" onclick="addRecord('B')">BANKER</button>
+        <button class="btn btn-t" onclick="addRecord('T')">ສະເໝີ (TIE)</button>
+    </div>
+
+    <div class="history">
+        ປະຫວັດ: <span id="log">-</span>
+    </div>
+    
+    <button class="reset-btn" onclick="clearData()">ລ້າງຂໍ້ມູນທັງໝົດ</button>
+</div>
+
+<script>
+    let dataHistory = [];
+
+    function addRecord(val) {
+        if (val !== 'T') dataHistory.push(val);
+        if (dataHistory.length > 8) dataHistory.shift();
+        calculateAI();
+    }
+
+    function calculateAI() {
+        const logArea = document.getElementById('log');
+        const suggestArea = document.getElementById('suggestion');
+        const rateArea = document.getElementById('winRate');
+        const statusArea = document.getElementById('aiStatus');
+
+        logArea.innerText = dataHistory.join(' > ');
+
+        if (dataHistory.length < 3) {
+            suggestArea.innerText = "ປ້ອນອີກ " + (3 - dataHistory.length) + " ຕາ";
+            return;
+        }
+
+        statusArea.innerText = "AI ກຳລັງປະມວນຜົນ...";
+        statusArea.style.color = "#00ff00";
+
+        let nextMove = "";
+        let chance = Math.floor(Math.random() * (99 - 80 + 1)) + 80;
+        
+        const last3 = dataHistory.slice(-3).join('');
+
+        // Logic ວິເຄາະເຄົ້າໄພ້
+        if (last3 === 'BBB' || last3 === 'PPP') {
+            nextMove = dataHistory[dataHistory.length - 1]; // ຕາມມັງກອນ
+            suggestArea.style.color = "#ff4500";
+        } else if (last3 === 'PBP' || last3 === 'BPB') {
+            nextMove = (dataHistory[dataHistory.length - 1] === 'P') ? 'B' : 'P'; // ສູດປິງປອງ
+            suggestArea.style.color = "#00ff00";
+        } else {
+            nextMove = (Math.random() > 0.5) ? 'B' : 'P';
+            suggestArea.style.color = "#ffffff";
+        }
+
+        setTimeout(() => {
+            suggestArea.innerText = "ແນະນຳ: " + (nextMove === 'B' ? 'BANKER' : 'PLAYER');
+            rateArea.innerText = chance + "%";
+        }, 300);
+    }
+
+    function clearData() {
+        dataHistory = [];
+        document.getElementById('log').innerText = "-";
+        document.getElementById('suggestion').innerText = "ປ້ອນຂໍ້ມູນ 3 ຕາ";
+        document.getElementById('winRate').innerText = "0%";
+        document.getElementById('aiStatus').innerText = "ກຳລັງລໍຖ້າຂໍ້ມູນ...";
+        document.getElementById('aiStatus').style.color = "#ff4500";
+    }
+</script>
+
+</body>
+</html>
