@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ນ້ຳເຕົ້າປູປາ - ລະບົບແອດມິນ GitHub ເວີຊັນ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght=400;700&display=swap');
+        body { font-family: 'Noto Sans Lao', sans-serif; background-color: #0b0f19; }
+        .chip-active { transform: scale(1.15); border-color: #f59e0b !important; box-shadow: 0 0 12px #f59e0b; }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col justify-between">
+
+    <div id="login-page" class="flex-1 flex items-center justify-center p-4">
+        <div class="bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-800">
+            <h2 class="text-2xl font-bold text-center text-blue-400 mb-6"><i class="fas fa-sign-in-alt mr-2"></i>ເຂົ້າສູ່ລະບົບ</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ຊື່ຜູ້ໃຊ້ (Username)</label>
+                    <input type="text" id="login-username" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-white" placeholder="ຊື່ລູກຄ້າ">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ລະຫັດຜ່ານ (Password)</label>
+                    <input type="password" id="login-password" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-white" placeholder="ໃສ່ລະຫັດຜ່ານ">
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 transition py-3 rounded-xl font-bold text-white mt-2 shadow-lg">
+                    ເຂົ້າສູ່ລະບົບ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-page" class="hidden flex-1 flex flex-col">
+        <header class="bg-slate-900/80 backdrop-blur p-4 flex justify-between items-center border-b border-slate-800/60 sticky top-0 z-50">
+            <div class="flex items-center space-x-2">
+                <span class="text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent from-blue-400 to-indigo-400">ນ້ຳເຕົ້າປູປາ</span>
+                <span id="role-badge" class="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded font-bold border border-red-500/30">ແອດມິນ</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <div class="text-xs text-slate-400" id="user-display-name">admin</div>
+                    <div class="text-amber-400 font-bold font-mono text-base" id="credit-display">0 K</div>
+                </div>
+                <button onclick="handleLogout()" class="text-slate-400 hover:text-red-400 transition">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="max-w-md w-full mx-auto p-4 space-y-4">
+            <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800/80 flex justify-between items-center">
+                <div>
+                    <span class="text-xs text-slate-400 block mb-0.5">ສະຖານະຮອບນີ້</span>
+                    <span id="game-status-text" class="text-sm font-bold text-emerald-400">ກຳລັງເປີດຮັບເດີມພັນ</span>
+                </div>
+                <div id="timer-box" class="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-mono font-bold text-xl text-emerald-400 shadow-inner">20</div>
+            </div>
+
+            <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800/80 text-center">
+                <div class="flex justify-center space-x-4 py-1">
+                    <div id="dice-1" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-center text-3xl shadow-md">❓</div>
+                    <div id="dice-2" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-center text-3xl shadow-md">❓</div>
+                    <div id="dice-3" class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-center text-3xl shadow-md">❓</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <div onclick="placeBet('ປູ')" class="cursor-pointer active:scale-95 transition bg-amber-100 hover:bg-amber-200 text-slate-900 p-3 rounded-xl flex flex-col items-center justify-center relative font-bold border border-amber-300 min-h-[90px]">
+                    <span class="text-3xl">🦀</span><span class="text-xs mt-1">ປູ</span>
+                    <div id="bet-total-ປູ" class="absolute top-1 right-2 text-[10px] bg-red-600 text-white px-1.5 py-0.5 rounded-full font-mono font-bold hidden">0</div>
+                </div>
+                <div onclick="placeBet('ປາ')" class="cursor-pointer active:scale-95 transition bg-blue-100 hover:bg-blue-200 text-slate-900 p-3 rounded-xl flex flex-col items-center justify-center relative font-bold border border-blue-300 min-h-[90px]">
+                    <span class="text-3xl">🐟</span><span class="text-xs mt-1">ປາ</span>
+                    <div id="bet-total-ປາ" class="absolute top-1 right-2 text-[10px] bg-red-600 text-white px-1.5 py-0.5 rounded-full font-mono font-bold hidden">0</div>
+                </div>
+                <div onclick="placeBet('ນ້ຳເຕົ້າ')" class="cursor-pointer active:scale-95 transition bg-red-100 hover:bg-red-200 text-slate-900 p-3 rounded-xl flex flex-col items-center justify-center relative font-bold border border-red-300 min-h-[90px]">
+                    <span class="text-3xl">🏮</span><span class="text-xs mt-1">ນ້ຳເຕົ້າ</span>
+                    <div id="bet-total-ນ້ຳເຕົ້າ" class="absolute top-1 right-2 text-[10px] bg-red-600 text-white px-1.5 py-0.5 rounded-full font-mono font-bold hidden">0</div>
+                </div>
+                <div onclick="placeBet('ເສືອ')" class="cursor-pointer active:scale-95 transition bg-orange-100 hover:bg-orange-200 text-slate-900 p-3 rounded-xl flex flex-col items-center justify-center relative font-bold border border-orange-300 min-h-[90px]">
+                    <span class="text-3xl">🐯</span><span class="text-xs mt-1">ເສືອ</span>
+                    <div id="bet-total-ເສືອ" class="absolute top-1 right-2 text-[10px] bg-red-600 text-white px-1.5 py-0.5 rounded-full font-mono font-bold hidden">0</div>
+                </div>
+                <div onclick="placeBet('ໄກ່')" class="cursor-pointer active:scale-95 transition bg-yellow-100 hover:bg-yellow-200 text-slate-900 p-3 rounded-xl flex flex-col items-center justify-center relative font-bold border border-yellow-300 min-h-[90px]">
+                    <span class="text-3xl">🐓</span><span class="text-xs mt-1">ໄກ່</span>
+                    <div id="bet-total-ໄກ່" class="absolute top-1 right-2 text-[10px] bg-red-600 text-white px-1.5 py-0.5 rounded-full font-mono font-bold hidden">0</div>
+                </div>
+                <div onclick="placeBet('ກຸ້ງ')" class="cursor-pointer active:scale-95 transition bg-emerald-100 hover:bg-emerald-200 text-slate-900 p-3 rounded-xl flex flex-col items-center justify-center relative font-bold border border-emerald-300 min-h-[90px]">
+                    <span class="text-3xl">🦐</span><span class="text-xs mt-1">ກຸ້ງ</span>
+                    <div id="bet-total-ກຸ້ງ" class="absolute top-1 right-2 text-[10px] bg-red-600 text-white px-1.5 py-0.5 rounded-full font-mono font-bold hidden">0</div>
+                </div>
+            </div>
+
+            <div class="flex justify-center space-x-3 py-2 bg-slate-900/40 rounded-xl p-2 border border-slate-800">
+                <button onclick="selectChip(10)" id="chip-10" class="w-11 h-11 rounded-full bg-blue-600 border-2 border-white font-mono font-bold text-xs shadow-md active:scale-90 transition chip-active">10</button>
+                <button onclick="selectChip(20)" id="chip-20" class="w-11 h-11 rounded-full bg-amber-500 border-2 border-white font-mono font-bold text-xs text-slate-950 shadow-md active:scale-90 transition">20</button>
+                <button onclick="selectChip(50)" id="chip-50" class="w-11 h-11 rounded-full bg-emerald-600 border-2 border-white font-mono font-bold text-xs shadow-md active:scale-90 transition">50</button>
+                <button onclick="selectChip(100)" id="chip-100" class="w-11 h-11 rounded-full bg-purple-600 border-2 border-white font-mono font-bold text-xs shadow-md active:scale-90 transition">100</button>
+                <button onclick="selectChip(200)" id="chip-200" class="w-11 h-11 rounded-full bg-red-600 border-2 border-white font-mono font-bold text-xs shadow-md active:scale-90 transition">200</button>
+            </div>
+
+            <div class="bg-slate-900/50 p-3 rounded-2xl border border-slate-800/80 flex justify-between items-center text-xs">
+                <span class="text-slate-400">ປະຫວັດລ້າສຸດ:</span>
+                <div class="flex space-x-4">
+                    <div id="hist-1" class="text-lg">🦐 🦀 🐟</div>
+                    <div id="hist-2" class="text-lg text-slate-500">🦐 🦐 🐯</div>
+                </div>
+            </div>
+
+            <div id="admin-panel" class="hidden bg-slate-900/80 p-5 rounded-2xl border border-amber-500/20 shadow-xl space-y-4">
+                <div class="flex items-center space-x-2 text-amber-400 font-bold pb-2 border-b border-slate-800">
+                    <i class="fas fa-shield-alt text-sm"></i>
+                    <h2 class="text-sm">ລະບົບຫຼັງບ້ານແອດມິນ</h2>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-xl border border-amber-500/30 space-y-2">
+                    <span class="text-xs font-bold text-amber-400 flex items-center">
+                        <i class="fas fa-gamepad mr-1.5"></i> ໂໝດຄວບຄຸມຜົນການອອກ (Cheat Mode)
+                    </span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setCheatMode('normal')" id="btn-mode-normal" class="bg-blue-600 text-white font-bold py-2 rounded-xl text-xs transition border border-transparent shadow-md">
+                            <i class="fas fa-random mr-1"></i> ປົກກະຕິ
+                        </button>
+                        <button onclick="setCheatMode('admin')" id="btn-mode-admin" class="bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-xs transition border border-slate-700">
+                            <i class="fas fa-gavel mr-1"></i> ແອດມິນກິນ
+                        </button>
+                        <button onclick="setCheatMode('user')" id="btn-mode-user" class="bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-xs transition border border-slate-700">
+                            <i class="fas fa-gift mr-1"></i> ລູກຄ້າກິນ
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-slate-400 italic mt-1" id="mode-desc-text">ໂໝດປົກກະຕິ: ລະບົບສຸ່ມຜົນແບບຍຸດຕິທຳ 100%</p>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-xl border border-blue-500/20 space-y-2">
+                    <span class="text-xs font-bold text-blue-400 flex items-center">
+                        <i class="fas fa-eye mr-1.5 animate-pulse"></i> ຍອດແທງທັງໝົດໃນຮອບນີ້ (Live Bets)
+                    </span>
+                    <div id="live-bets-display" class="text-xs font-mono text-slate-300 max-h-24 overflow-y-auto space-y-1.5"></div>
+                </div>
+
+                <div class="space-y-2 pt-1">
+                    <span class="text-xs font-bold text-slate-300 flex items-center"><i class="fas fa-wallet mr-1.5 text-amber-400"></i> ຈັດການເຄຣດິດລູກຄ້າ</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="target-user" placeholder="ຊື່ລູກຄ້າ" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 col-span-2">
+                        <input type="number" id="credit-to-add" placeholder="ຈຳນວນເງິນ" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 col-span-2 font-mono">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="topUpCredit('add')" class="bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition hover:bg-amber-400">
+                            <i class="fas fa-plus-circle mr-1"></i> ເຕີມເງິນ
+                        </button>
+                        <button onclick="topUpCredit('remove')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">
+                            <i class="fas fa-minus-circle mr-1"></i> ດຶງເຄຣດິດຄືນ
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-slate-800/60">
+                    <span class="text-xs font-bold text-slate-300 flex items-center"><i class="fas fa-user-plus mr-1.5 text-emerald-400"></i> ສ້າງບັນຊີລູກຄ້າ</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="admin-new-user" placeholder="ຊື່ຜູ້ໃຊ້" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                        <input type="text" id="admin-new-pass" placeholder="ລະຫັດຜ່ານ" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button onclick="adminCreateCustomer()" class="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/20 font-bold py-2 rounded-xl text-xs transition">
+                        ຢືນຢັນການສ້າງບັນຊີ
+                    </button>
+                </div>
+
+                <div class="pt-2 border-t border-slate-800/60">
+                    <span class="text-xs font-bold text-slate-400 block mb-2"><i class="fas fa-users mr-1.5"></i> ລາຍຊື່ສະມາຊິກລູກຄ້າທັງໝົດ</span>
+                    <div id="user-list-display" class="text-xs bg-slate-950 rounded-xl border border-slate-800 p-3 font-mono text-slate-300 max-h-36 overflow-y-auto space-y-2"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="p-4 text-center text-[10px] text-slate-600">
+        &copy; 2026 ລະບົບນ້ຳເຕົ້າປູປາ - ເວີຊັນ GitHub ສົມບູນແບບ
+    </footer>
+
+    <script>
+        let users = JSON.parse(localStorage.getItem('gh_users')) || {};
+        
+        if (!users['admin']) {
+            users['admin'] = { username: 'admin', password: '94357757', role: 'admin', credit: Infinity };
+            localStorage.setItem('gh_users', JSON.stringify(users));
+        }
+
+        let liveBetsLog = JSON.parse(localStorage.getItem('gh_liveBets')) || {};
+        let currentActiveUser = null;
+        let countdownTimer = null;
+        let timeLeft = 20;
+        let isBettingOpen = true;
+        let selectedChipValue = 10; 
+
+        let gameControlMode = localStorage.getItem('gh_game_mode') || 'normal';
+
+        const soundBeep = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav'); 
+        const soundTimeOut = new Audio('https://assets.mixkit.co/active_storage/sfx/911/911-84.wav'); 
+        const soundWin = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-84.wav'); 
+
+        const diceItems = [
+            { name: 'ປູ', emoji: '🦀' }, { name: 'ປາ', emoji: '🐟' }, { name: 'ນ້ຳເຕົ້າ', emoji: '🏮' },
+            { name: 'ເສືອ', emoji: '🐯' }, { name: 'ໄກ່', emoji: '🐓' }, { name: 'ກຸ້ງ', emoji: '🦐' }
+        ];
+
+        function playAudioResult(text) {
+            const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=th&client=tw-ob&q=${encodeURIComponent(text)}`;
+            const audio = new Audio(audioUrl);
+            audio.play().catch(e => console.log("Audio Error: ", e));
+        }
+
+        function updateUI() {
+            if(!currentActiveUser) return;
+            let currentUsers = JSON.parse(localStorage.getItem('gh_users')) || {};
+            
+            if(!currentUsers[currentActiveUser.username]) {
+                alert('ບັນຊີນີ້ຖືກລຶບແລ້ວ!');
+                handleLogout();
+                return;
+            }
+
+            let myData = currentUsers[currentActiveUser.username];
+            document.getElementById('user-display-name').innerText = myData.username;
+            
+            if(myData.role === 'admin') {
+                document.getElementById('credit-display').innerText = "∞ K";
+            } else {
+                document.getElementById('credit-display').innerText = myData.credit.toLocaleString() + " K";
+            }
+        }
+
+        function setCheatMode(mode) {
+            gameControlMode = mode;
+            localStorage.setItem('gh_game_mode', mode);
+            
+            document.getElementById('btn-mode-normal').className = "bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-xs transition border border-slate-700";
+            document.getElementById('btn-mode-admin').className = "bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-xs transition border border-slate-700";
+            document.getElementById('btn-mode-user').className = "bg-slate-800 text-slate-400 font-bold py-2 rounded-xl text-xs transition border border-slate-700";
+            
+            const desc = document.getElementById('mode-desc-text');
+
+            if(mode === 'normal') {
+                document.getElementById('btn-mode-normal').className = "bg-blue-600 text-white font-bold py-2 rounded-xl text-xs transition border border-transparent shadow-md";
+                desc.innerText = "ໂໝດປົກກະຕິ: ລະບົບສຸ່ມຜົນແບບຍຸດຕິທຳ 100%";
+            } else if(mode === 'admin') {
+                document.getElementById('btn-mode-admin').className = "bg-red-600 text-white font-bold py-2 rounded-xl text-xs transition border border-transparent shadow-md";
+                desc.innerText = "ໂໝດແອດມິນກິນ: ລະບົບຈະເລືອກອອກໜ້າທີ່ມີຄົນແທງໜ້ອຍທີ່ສຸດ ເພື່ອໃຫ້ແອດມິນໄດ້ກຳໄລ!";
+            } else if(mode === 'user') {
+                document.getElementById('btn-mode-user').className = "bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs transition border border-transparent shadow-md";
+                desc.innerText = "ໂໝດລູກຄ້າກິນ: ລະບົບຈະເລືອກອອກໜ້າທີ່ມີຄົນແທງຫຼາຍທີ່ສຸດ ເພື່ອແຈກລາງວັນ!";
+            }
+        }
+
+        function switchPage(pageId) {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('game-page').classList.add('hidden');
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            if(pageId === 'game-page') { 
+                startTimer(); 
+                updateAdminUserList(); 
+                updateLiveBetsDisplay(); 
+                updateUI();
+                
+                const roleBadge = document.getElementById('role-badge');
+                const adminPanel = document.getElementById('admin-panel');
+                
+                if(currentActiveUser.role === 'admin') {
+                    roleBadge.innerText = "ແອດມິນ";
+                    roleBadge.className = "bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded font-bold border border-red-500/30";
+                    adminPanel.classList.remove('hidden');
+                    setCheatMode(gameControlMode); 
+                } else {
+                    roleBadge.innerText = "ລູກຄ້າ";
+                    roleBadge.className = "bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded font-bold border border-emerald-500/30";
+                    adminPanel.classList.add('hidden');
+                }
+            } else { 
+                clearInterval(countdownTimer); 
+            }
+        }
+
+        function handleLogin() {
+            const u = document.getElementById('login-username').value.trim();
+            const p = document.getElementById('login-password').value.trim();
+            
+            let currentUsers = JSON.parse(localStorage.getItem('gh_users'));
+            if(!currentUsers[u] || currentUsers[u].password !== p) {
+                return alert('ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ!');
+            }
+
+            currentActiveUser = currentUsers[u];
+            switchPage('game-page');
+        }
+
+        function selectChip(value) {
+            selectedChipValue = value;
+            [10, 20, 50, 100, 200].forEach(c => {
+                document.getElementById(`chip-${c}`).classList.remove('chip-active');
+            });
+            document.getElementById(`chip-${value}`).classList.add('chip-active');
+        }
+
+        function placeBet(type) {
+            if (!isBettingOpen) return alert('ປິດຮັບເດີມພັນແລ້ວ!');
+            
+            let currentUsers = JSON.parse(localStorage.getItem('gh_users'));
+            let myUsername = currentActiveUser.username;
+
+            if (currentUsers[myUsername].role !== 'admin') {
+                if (currentUsers[myUsername].credit < selectedChipValue) {
+                    return alert('ເຄຣດິດບໍ່ພໍ!');
+                }
+                currentUsers[myUsername].credit -= selectedChipValue;
+                localStorage.setItem('gh_users', JSON.stringify(currentUsers));
+                updateUI();
+            }
+
+            if (!liveBetsLog[myUsername]) liveBetsLog[myUsername] = {};
+            liveBetsLog[myUsername][type] = (liveBetsLog[myUsername][type] || 0) + selectedChipValue;
+            
+            localStorage.setItem('gh_liveBets', JSON.stringify(liveBetsLog));
+            updateLiveBetsDisplay();
+        }
+
+        function adminCreateCustomer() {
+            const newUser = document.getElementById('admin-new-user').value.trim();
+            const newPass = document.getElementById('admin-new-pass').value.trim();
+
+            if(!newUser || !newPass) return alert('ກະລຸນາກອກຂໍ້ມູນໃຫ້ຄົບ!');
+            let currentUsers = JSON.parse(localStorage.getItem('gh_users'));
+            if(currentUsers[newUser]) return alert('ຊື່ນີ້ມີໃນລະບົບແລ້ວ!');
+
+            currentUsers[newUser] = { username: newUser, password: newPass, role: 'user', credit: 0 };
+            localStorage.setItem('gh_users', JSON.stringify(currentUsers));
+
+            alert(`ສ້າງບັນຊີ ${newUser} ສຳເລັດ!`);
+            document.getElementById('admin-new-user').value = '';
+            document.getElementById('admin-new-pass').value = '';
+            updateAdminUserList();
+        }
+
+        function adminDeleteCustomer(usernameToDel) {
+            if(confirm(`⚠️ ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບລູກຄ້າ [ ${usernameToDel} ] ອອກຈາກລະບົບ?`)) {
+                let currentUsers = JSON.parse(localStorage.getItem('gh_users'));
+                if(currentUsers[usernameToDel]) {
+                    delete currentUsers[usernameToDel]; 
+                    localStorage.setItem('gh_users', JSON.stringify(currentUsers));
+                    alert(`ລຶບລູກຄ້າ ${usernameToDel} ສຳເລັດ!`);
+                    updateAdminUserList();
+                }
+            }
+        }
+
+        function topUpCredit(action) {
+            const targetUser = document.getElementById('target-user').value.trim();
+            const amount = parseFloat(document.getElementById('credit-to-add').value);
+
+            if(!targetUser || isNaN(amount) || amount <= 0) return alert('ຂໍ້ມູນບໍ່ຖືກຕ້ອງ!');
+            let currentUsers = JSON.parse(localStorage.getItem('gh_users'));
+            if(!currentUsers[targetUser]) return alert('ບໍ່ພົບຊື່ຜູ້ໃຊ້ນີ້!');
+
+            if(action === 'add') {
+                currentUsers[targetUser].credit += amount;
+            } else if(action === 'remove') {
+                if(currentUsers[targetUser].credit < amount) return alert('ເຄຣດິດບໍ່ພໍໃຫ້ດຶງຄືນ!');
+                currentUsers[targetUser].credit -= amount;
+            }
+
+            localStorage.setItem('gh_users', JSON.stringify(currentUsers));
+            document.getElementById('target-user').value = '';
+            document.getElementById('credit-to-add').value = '';
+            updateAdminUserList();
+            updateUI();
+        }
+
+        function updateAdminUserList() {
+            const currentUsers = JSON.parse(localStorage.getItem('gh_users')) || {};
+            const listDisplay = document.getElementById('user-list-display');
+            if(!listDisplay) return;
+            listDisplay.innerHTML = '';
+            
+            let hasUser = false;
+            for(let key in currentUsers) {
+                if(currentUsers[key].role !== 'admin') {
+                    hasUser = true;
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between items-center bg-slate-900/60 p-2 rounded-xl border border-slate-800/40";
+                    div.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="text-slate-200 font-bold">👤 ${currentUsers[key].username}</span>
+                            <span class="text-[10px] text-slate-500">ລະຫັດ: ${currentUsers[key].password}</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-amber-400 font-bold">${currentUsers[key].credit.toLocaleString()} K</span>
+                            <button onclick="adminDeleteCustomer('${currentUsers[key].username}')" class="text-slate-500 hover:text-red-500 transition p-1.5">
+                                <i class="fas fa-trash-alt text-sm"></i>
+                            </button>
+                        </div>
+                    `;
+                    listDisplay.appendChild(div);
+                }
+            }
+            if(!hasUser) listDisplay.innerHTML = '<div class="text-slate-600 text-center py-2 text-xs">⏳ ຍັງບໍ່ມີລາຍຊື່ລູກຄ້າ</div>';
+        }
+
+        function updateLiveBetsDisplay() {
+            const display = document.getElementById('live-bets-display');
+            if(!display) return;
+            display.innerHTML = '';
+            
+            diceItems.forEach(d => {
+                const badge = document.getElementById(`bet-total-${d.name}`);
+                if(badge) { badge.innerText = '0'; badge.classList.add('hidden'); }
+            });
+
+            let hasBets = false;
+            for(let username in liveBetsLog) {
+                let userBets = liveBetsLog[username];
+                let betDetails = [];
+                for(let type in userBets) {
+                    if(userBets[type] > 0) {
+                        hasBets = true;
+                        let emoji = diceItems.find(d => d.name === type)?.emoji || '';
+                        betDetails.push(`${emoji}${type}: ${userBets[type]}K`);
+                    }
+                }
+                if(betDetails.length > 0) {
+                    const div = document.createElement('div');
+                    div.className = "bg-slate-900/60 p-1.5 rounded flex justify-between text-[11px]";
+                    div.innerHTML = `<span>${username}</span> <span class="text-amber-400">${betDetails.join(' | ')}</span>`;
+                    display.appendChild(div);
+                }
+            }
+            
+            let myUsername = currentActiveUser ? currentActiveUser.username : '';
+            if (liveBetsLog[myUsername]) {
+                for(let type in liveBetsLog[myUsername]) {
+                    const badge = document.getElementById(`bet-total-${type}`);
+                    if(badge && liveBetsLog[myUsername][type] > 0) {
+                        badge.innerText = liveBetsLog[myUsername][type] + "K";
+                        badge.classList.remove('hidden');
+                    }
+                }
+            }
+            if(!hasBets) display.innerHTML = '<div class="text-slate-600 text-center text-[11px]">⏳ ຍັງບໍ່ມີການວາງເດີມພັນ</div>';
+        }
+
+        function checkRewardsAndPay(res1, res2, res3) {
+            let currentUsers = JSON.parse(localStorage.getItem('gh_users')) || {};
+            for (let username in liveBetsLog) {
+                if(!currentUsers[username]) continue;
+                let userBets = liveBetsLog[username];
+                let winAmount = 0;
+
+                [res1, res2, res3].forEach(dice => {
+                    if (userBets[dice.name] && userBets[dice.name] > 0) {
+                        winAmount += userBets[dice.name] * 2; 
+                    }
+                });
+
+                if (winAmount > 0) {
+                    if (currentUsers[username].role !== 'admin') currentUsers[username].credit += winAmount;
+                    if (username === currentActiveUser.username) {
+                        soundWin.currentTime = 0; soundWin.play().catch(e => console.log(e));
+                        setTimeout(() => { alert(`🎉 ຍິນດີນຳ! ທ່ານໄດ້ຮັບເຄຣດິດ +${winAmount} K`); }, 500);
+                    }
+                }
+            }
+            localStorage.setItem('gh_users', JSON.stringify(currentUsers));
+            updateUI(); updateAdminUserList();
+        }
+
+        function generateDiceResults() {
+            let totalBetsPerType = { 'ປູ': 0, 'ປາ': 0, 'ນ້ຳເຕົ້າ': 0, 'ເສືອ': 0, 'ໄກ່': 0, 'ກຸ້ງ': 0 };
+            
+            for (let username in liveBetsLog) {
+                let userBets = liveBetsLog[username];
+                for (let type in userBets) {
+                    if (totalBetsPerType[type] !== undefined) {
+                        totalBetsPerType[type] += userBets[type];
+                    }
+                }
+            }
+
+            let sortedTypes = Object.keys(totalBetsPerType).map(name => {
+                return { name: name, amount: totalBetsPerType[name] };
+            });
+
+            let finalDice = [];
+
+            if (gameControlMode === 'admin') {
+                sortedTypes.sort((a, b) => a.amount - b.amount);
+                for(let i = 0; i < 3; i++) {
+                    let target = diceItems.find(d => d.name === sortedTypes[i].name);
+                    finalDice.push(target);
+                }
+            } else if (gameControlMode === 'user') {
+                sortedTypes.sort((a, b) => b.amount - a.amount);
+                for(let i = 0; i < 3; i++) {
+                    let target = diceItems.find(d => d.name === sortedTypes[i].name);
+                    finalDice.push(target);
+                }
+            } else {
+                for(let i = 0; i < 3; i++) {
+                    let randomItem = diceItems[Math.floor(Math.random() * diceItems.length)];
+                    finalDice.push(randomItem);
+                }
+            }
+            return finalDice;
+        }
+
+        function startTimer() {
+            clearInterval(countdownTimer);
+            timeLeft = 20; isBettingOpen = true;
+            document.getElementById('game-status-text').innerText = "ກຳລັງເປີດຮັບເດີມພັນ";
+            document.getElementById('game-status-text').className = "text-sm font-bold text-emerald-400 animate-pulse";
+            document.getElementById('timer-box').innerText = timeLeft;
+
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-box').innerText = timeLeft;
+
+                if (timeLeft <= 5 && timeLeft > 0) {
+                    soundBeep.currentTime = 0; soundBeep.play().catch(e => console.log(e));
+                }
+
+                if (timeLeft <= 0) {
+                    isBettingOpen = false;
+                    document.getElementById('game-status-text').innerText = "ປິດຮັບເດີມພັນ / ກຳລັງອອກຜົນ";
+                    document.getElementById('game-status-text').className = "text-sm font-bold text-red-500";
+                    clearInterval(countdownTimer);
+                    
+                    soundTimeOut.currentTime = 0; soundTimeOut.play().catch(e => console.log(e));
+                    
+                    const results = generateDiceResults();
+                    const res1 = results[0];
+                    const res2 = results[1];
+                    const res3 = results[2];
+
+                    document.getElementById('dice-1').innerText = res1.emoji;
+                    document.getElementById('dice-2').innerText = res2.emoji;
+                    document.getElementById('dice-3').innerText = res3.emoji;
+                    
+                    document.getElementById('hist-2').innerText = document.getElementById('hist-1').innerText;
+                    document.getElementById('hist-1').innerText = `${res1.emoji} ${res2.emoji} ${res3.emoji}`;
+
+                    playAudioResult(`ผลที่ออกคือ ${res1.name} ${res2.name} ${res3.name}`);
+                    checkRewardsAndPay(res1, res2, res3);
+
+                    setTimeout(() => {
+                        liveBetsLog = {};
+                        localStorage.setItem('gh_liveBets', JSON.stringify(liveBetsLog));
+                        updateLiveBetsDisplay();
+                        document.getElementById('dice-1').innerText = '❓';
+                        document.getElementById('dice-2').innerText = '❓';
+                        document.getElementById('dice-3').innerText = '❓';
+                        startTimer();
+                    }, 4000); 
+                }
+            }, 1000);
+        }
+
+        function handleLogout() { currentActiveUser = null; switchPage('login-page'); }
+        switchPage('login-page');
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAJNqy3BME_kCcjQnIkjXK6KLDaHIifzs",
+            authDomain: "mygameweb-be065.firebaseapp.com",
+            projectId: "mygameweb-be065",
+            storageBucket: "mygameweb-be065.firebasestorage.app",
+            messagingSenderId: "200976620257",
+            appId: "1:200976620257:web:92e50f33a00c09561035a0",
+            measurementId: "G-9QML8SKG49"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
+</body>
+</html>
